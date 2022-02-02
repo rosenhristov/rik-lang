@@ -1,4 +1,4 @@
-package interpreter;
+package main.java.rosenhristov.interpreter;
 
 public interface Constants {
     String SOURCE_FILE_EXTENSION = ".rik";

@@ -1,8 +1,8 @@
-package interpreter;
+package main.java.rosenhristov.interpreter;
 
 import java.io.File;
 
-import static interpreter.Constants.SOURCE_FILE_EXTENSION;
+import static main.java.rosenhristov.interpreter.Constants.SOURCE_FILE_EXTENSION;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 

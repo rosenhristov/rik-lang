@@ -1,4 +1,4 @@
-package interpreter;
+package main.java.rosenhristov.interpreter;
 
 import java.util.regex.Pattern;
 

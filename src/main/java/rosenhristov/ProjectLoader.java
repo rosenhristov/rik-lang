@@ -1,4 +1,6 @@
-import interpreter.Constants;
+package main.java.rosenhristov;
+
+import main.java.rosenhristov.interpreter.Constants;
 
 import java.io.File;
 import java.util.Arrays;

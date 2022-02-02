@@ -1,5 +1,7 @@
-import interpreter.Lexer;
-import interpreter.Token;
+package main.java.rosenhristov;
+
+import main.java.rosenhristov.interpreter.Lexer;
+import main.java.rosenhristov.interpreter.Token;
 
 import java.io.File;
 import java.io.IOException;

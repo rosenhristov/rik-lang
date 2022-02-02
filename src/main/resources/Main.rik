@@ -1,0 +1,29 @@
+
+/**
+ * This class is just a sample that is used to test 
+ * if the lexer of the new language calledd Rik or Robik 
+ * (not yet decided) works fine
+ */
+class Main {
+	static main(String... args) {
+		i32 int = 0
+		int22356215515=325+15
+		int3=int+25
+		f32 float = 25e-4
+		hex = 0xAEF
+		space_integer = 10 000 000
+		comma_integer = 10,000
+		underscore_integer = 1_000
+		String string = "Hello, how are you?"
+		char c = 'c'
+		c = '\u0563'
+		c = '\\'
+		c = '\''
+		
+		// "Hello, World" program.
+		/*
+		 * "Hello, World" program.
+		 * Multiline comment
+		 */	
+	}
+}

@@ -13,7 +13,7 @@ public class Rik {
 
     public static void main(String[] args) throws IOException {
         ProjectLoader projectLoader = new ProjectLoader();
-        Map<File, List<File>> projectMap = projectLoader.createProject("C:\\Users\\rhristov\\personalProjects", "proj");
+        Map<File, List<File>> projectMap = projectLoader.createProject("src/main/resources", "proj");
         List<File> sourceFiles = projectMap.values().stream()
                                     .flatMap(list -> list.stream())
                                     .collect(Collectors.toList());

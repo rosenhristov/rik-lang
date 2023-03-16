@@ -2,7 +2,6 @@ package main.java.rosenhristov;
 
 import main.java.rosenhristov.interpreter.Lexer;
 import main.java.rosenhristov.interpreter.LexingMap;
-import main.java.rosenhristov.interpreter.LexingResult;
 
 import java.io.*;
 import java.util.LinkedHashMap;

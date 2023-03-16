@@ -1,6 +1,7 @@
 package main.java.rosenhristov.interpreter;
 
 import java.io.Serializable;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -9,6 +10,10 @@ public class Bimap<K extends Comparable<K>, V extends Comparable<V>> implements 
     private Map<K, V> map;
     private Map<V, K> reversedMap;
 
+    public Bimap() {
+        this.map = new LinkedHashMap<>();
+        this.reversedMap = new LinkedHashMap<>();
+    }
 
     public boolean put(K key, V value) {
         boolean isUniqueKeyValPair = isUniqueEntry(key, value);
@@ -54,13 +59,9 @@ public class Bimap<K extends Comparable<K>, V extends Comparable<V>> implements 
     public Comparable remove(Comparable key, Comparable value) {
         return map.containsKey(key)
                 ? removeByKey((K) key)
-                : map.containsKey(value)
-                ? removeByKey((K) value)
                 : reversedMap.containsKey(key)
-                ? removeByValue((V) key)
-                : reversedMap.containsKey(value)
-                ? removeByValue((V) value)
-                : null;
+                    ? removeByValue((V) key)
+                    : null;
     }
 
     public V removeByKey(K key) {

@@ -10,10 +10,24 @@ public class Bimap<K extends Comparable<K>, V extends Comparable<V>> implements 
     private Map<K, V> map;
     private Map<V, K> reversedMap;
 
-    public Bimap() {
+    private Bimap() {
         this.map = new LinkedHashMap<>();
         this.reversedMap = new LinkedHashMap<>();
     }
+
+    private Bimap(Map<K, V> map) {
+        this();
+        putAll(map);
+    }
+
+    public static Bimap create() {
+        return new Bimap();
+    }
+
+    public static Bimap of(Map<Comparable, Comparable> map) {
+        return new Bimap(map);
+    }
+
 
     public boolean put(K key, V value) {
         boolean isUniqueKeyValPair = isUniqueEntry(key, value);

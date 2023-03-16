@@ -46,6 +46,8 @@ public enum TokenType {
 
     @Override
     public String toString() {
-        return this.name();
+        return this.name().toLowerCase().equals(NEWLINE.name().toLowerCase())
+                ? "new line"
+                : this.name().toLowerCase();
     }
 }

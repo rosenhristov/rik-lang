@@ -1,4 +1,4 @@
-
+package main;
 /**
  * This class is just a sample that is used to test 
  * if the lexer of the new language calledd Rik or Robik 

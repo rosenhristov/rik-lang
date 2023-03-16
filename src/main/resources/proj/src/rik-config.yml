@@ -1,0 +1,111 @@
+---
+  rik-keywords:
+    - abstract: абстрактен
+    - base: основа
+    - bool: булева
+    - case: случай
+    - catch: хвани
+    - char: знак
+    - class: клас
+    - default: основен
+    - do: направи
+    - else: иначе, или
+    - enum: енум
+    - extends: ":, разширява"
+    - f32: дроб32
+    - f64: дроб64
+    - i8: брой8
+    - i16: брой16
+    - i32: брой32
+    - i64: брой64
+    - int128: брой128
+    - const: конст
+    - finally: накрая
+    - false: грешно, не
+    - if: ако
+    - impl: ":, прилага"
+    - trait: роля
+    - is: е
+    - jump: скочи
+    - loop: за
+    - match: намери
+    - native: нативен
+    - null: нъл
+    - private: "#"
+    - protected: @
+    - pp: пп
+    - package: пакет
+    - return: "<-"
+    - skip: излез
+    - static: $
+    - strictfp: стриктфп
+    - string: низ
+    - sync: синх
+    - this: този
+    - throw: хвърли
+    - throws: хвърля
+    - transient: транс
+    - try: опитай
+    - true: вярно, да
+    - use: вмъкни
+    - void: ""
+    - volatile: волатилен
+...
+
+---
+  java-to-rik:
+      - abstract: abstract
+      - boolean: bool
+      - case: case
+      - catch: catch
+      - char: char
+      - class: class
+      - default: default
+      - do: do
+      - else: else
+      - enum: enum
+      - extends: ":"
+      - float: f32
+      - double: f64
+      - byte: byte
+      - short: i16
+      - int: i32
+      - long: i64
+      - final: const
+      - finally: finally
+      - false: false, no
+      - if: if
+      - implement: impl
+      - interface: trait
+      - instanceof: is
+      - continue: jump
+      - for: loop
+      - while: loop
+      - switch: match
+      - native: native
+      - null: null
+      - private: "#"
+      - protected: "@"
+      - package-private: pp
+      - package: pack
+      - return: "<-"
+      - break: skip
+      - static: $
+      - strictfp: strictfp
+      - super: base
+      - synchronize: sync
+      - this: this
+      - throw: throw
+      - throws: throws
+      - transient: trans
+      - try: try
+      - true: true, yes
+      - import: use
+      - void: void
+      - volatile: volatile
+...
+
+---
+
+...
+

@@ -3,6 +3,9 @@ package main.java.rosenhristov.interpreter;
 public class Token {
 
     private TokenType type;
+
+    /**
+     * @token - The value of the token*/
     private String token;
     private int index;
 
@@ -47,7 +50,7 @@ public class Token {
     @Override
     public String toString() {
         return "Token{"
-                + type +
+                + type.toString() +
                 " : " + token
                 + " : " + index
                 + "}";

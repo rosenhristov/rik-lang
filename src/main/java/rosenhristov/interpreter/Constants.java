@@ -2,10 +2,11 @@ package main.java.rosenhristov.interpreter;
 
 public interface Constants {
     String SOURCE_FILE_EXTENSION = ".rik";
+    String CONFIG_FILENAME = "rik-config.yml";
 
-    String KEYWORDS = "abstract|base|bool|case|catch|char|class|default|do|else|enum|extends|f32|f64|i8|i16|i32|i64|final|finally|for|if|implements|interface|is|jump|loop|match|native|null|private|protected|return|skip|space|static|strictfp|sync|this|throw|throws|transient|try|use|volatile|while";
+    String KEYWORDS = "abstract|base|bool|case|catch|char|class|const|default|do|else|enum|extends|f32|f64|i8|i16|i32|i64|i128|finally|for|if|impl|is|jump|loop|match|native|null|private|protected|package|return|skip|static|stritraitctfp|sync|this|throw|throws|trait|trans|try|use|volatile|while";
 
-    String PRIMITIVE_TYPES = "f32|f64|i8|i16|i32|i64|bool|";
+    String PRIMITIVE_TYPES = "bool|f32|f64|i8|i16|i32|i64";
     String MATH_OPERATORS = "+-*/<>%=";
     String UNARY_OPERATORS = "!|&";
     String LOGICAL_OPERATORS = "&|^";
@@ -17,14 +18,24 @@ public interface Constants {
     String IDENTIFIER_PATTERN = "([[a-z]{1}[a-zA-Z0-9_]*]+)";
     String RELATIONAL_OPERATORS = "<= >= < > == != <>";
 
+    String EMPTY_STRING = "";
+
     String SLASH = "/";
+    char SLASH_CHAR = '/';
+    char BACKSLASH_CHAR = '\\';
     String STAR = "*";
+    char STAR_CHAR = '*';
     String NEW_LINE = "\n";
+    char NEW_LINE_CHAR = '\n';
     String UNDERSCORE = "_";
+    char UNDERSCORE_CHAR = '_';
     String PERCENT = "%";
     String DECIMAL_SIGN = ".";
     String SINGLE_QUOTES = "\'";
+    char SINGLE_QUOTES_CHAR ='\'';
     String DOUBLE_QUOTES = "\"";
+    char DOUBLE_QUOTES_CHAR = '\"';
+    char U_CHAR_VALUE = 'u';
     String SINGLE_ALLOWED_OPERATORS = "*/%";
 //    String Mulop = "(/|%)";
 //    String Assignop = "(=|\\+=|-=)";

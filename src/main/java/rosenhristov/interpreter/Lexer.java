@@ -3,15 +3,14 @@ package main.java.rosenhristov.interpreter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-import static main.java.rosenhristov.interpreter.Constants.DOUBLE_QUOTES;
-import static main.java.rosenhristov.interpreter.Constants.NEW_LINE;
-import static main.java.rosenhristov.interpreter.Constants.SINGLE_ALLOWED_OPERATORS;
-import static main.java.rosenhristov.interpreter.Constants.SINGLE_QUOTES;
-import static main.java.rosenhristov.interpreter.Constants.STAR;
-import static main.java.rosenhristov.interpreter.Constants.UNDERSCORE;
+import static java.util.stream.Collectors.toMap;
+import static main.java.rosenhristov.interpreter.Constants.*;
+import static main.java.rosenhristov.interpreter.Constants.SINGLE_QUOTES_CHAR;
 import static main.java.rosenhristov.interpreter.TokenType.CHAR_LITERAL;
 import static main.java.rosenhristov.interpreter.TokenType.COMMENT;
 import static main.java.rosenhristov.interpreter.TokenType.DOC;
@@ -23,56 +22,75 @@ import static main.java.rosenhristov.interpreter.TokenType.SEPARATOR;
 import static main.java.rosenhristov.interpreter.TokenType.STRING_LITERAL;
 import static main.java.rosenhristov.interpreter.TokenType.WHITESPACE;
 import static main.java.rosenhristov.interpreter.TokenType.isTokenType;
-import static main.java.rosenhristov.interpreter.Utils.isEmpty;
-import static main.java.rosenhristov.interpreter.Utils.isValidSourceFile;
+import static main.java.rosenhristov.Utils.isEmpty;
+import static main.java.rosenhristov.Utils.isValidSourceFile;
 import static java.lang.Character.isDigit;
 import static java.lang.Character.isLetter;
 import static java.util.Objects.isNull;
 
 public class Lexer {
 
+    Map<File, List<File>> projectMap;
     private String sourcecode;
+    private File sourceFile;
     private List<String> keywords;
 
-    public Lexer() {
+    private LexingResult lexingResult;
+
+    private Lexer() {
         keywords = loadKeywords();
     }
 
-    public Lexer(File sourceFile) throws IOException {
+    private Lexer(Map<File, List<File>> projectMap) {
         this();
-        this.sourcecode = extractSourceCode(sourceFile);
-
+        this.projectMap = projectMap;
     }
 
-    public Lexer(String sourcecode) {
-        this();
-        this.sourcecode = sourcecode;
+    public static Lexer of(Map<File, List<File>> projectMap) {
+        return new Lexer (projectMap);
     }
 
-    public List<Token> lex(File sourceFile) throws IOException {
+    public LexingMap lexProjectMap() {
+        LexingMap lexedMap = new LexingMap();
+        projectMap.entrySet().stream().forEach(entry -> {
+            lexedMap.put(
+                    entry.getKey().getPath(),
+                     entry.getValue().stream().map(file -> {
+                        try {
+                            return lex(file);
+                        } catch (IOException e) {
+                            throw new RuntimeException(String.format("Problems tokenizing file %s", file), e);
+                        }
+                    }).collect(Collectors.toList()));
+        });
+
+        return lexedMap;
+    }
+
+    public LexingResult lex(File sourceFile) throws IOException {
+        return tokenizeFile(sourceFile);
+    }
+
+
+
+    public LexingResult tokenizeFile(File sourceFile) {
+        this.sourceFile = sourceFile;
         return lex(extractSourceCode(sourceFile));
     }
 
-    public List<Token> lex(String sourceCode) {
+    public LexingResult lex(String sourceCode) {
         this.sourcecode = sourceCode;
         return lex();
     }
 
-    public List<Token> lex() {
-        return lex(new LinkedList<>());
-    }
-
-    public void lex(String sourceCode, List<Token> tokens) {
-        this.sourcecode = sourceCode;
-        lex(tokens);
-    }
-
-    public List<Token> lex(List<Token> tokens) {
-        if (isNull(tokens)) {
-            tokens = new LinkedList<>();
+    public LexingResult lex() {
+        if (isNull(lexingResult)) {
+            lexingResult = new LexingResult(this.sourceFile);
         }
+
         if(isEmpty(sourcecode)) {
-            return tokens;
+            lexingResult.addError("There is no source code in this file");
+            return lexingResult;
         }
         int index = 0;
         while(index < sourceSize()) {
@@ -80,27 +98,27 @@ public class Lexer {
             if (WHITESPACE.matches(symbol) && !NEWLINE.matches(symbol)) {
                 index++; // ignore whitespaces
             } else if (NEWLINE.matches(symbol)) {
-                tokens.add(new Token(NEWLINE, symbol, index));
+                tokens().add(new Token(NEWLINE, symbol, index));
                 index++;
-            } else if(isLetter(symbol) || symbol == UNDERSCORE.charAt(0)) {
+            } else if(isLetter(symbol) || symbol == UNDERSCORE_CHAR) {
                 int startOfToken = index;
                 StringBuilder word = new StringBuilder();
                 index = appendWord(word, index);
                 TokenType type = deriveWordType(word.toString());
-                tokens.add(new Token(type, word.toString(), startOfToken));
+                tokens().add(new Token(type, word.toString(), startOfToken));
             } else if(isDigit(symbol)) {
                 StringBuilder number = new StringBuilder();
                 index = appendNumber(number, index);
-                tokens.add(new Token(NUMBER, number.toString(), index));
+                tokens().add(new Token(NUMBER, number.toString(), index));
             } else if(OPERATOR.matches(symbol) && !isStartOfComment(symbol, index)) {
                 if(isSingleOnlyOperator(symbol) || (!isSingleOnlyOperator(symbol) && !isTokenType(OPERATOR, nextChar(index)))) {
-                    tokens.add(new Token(OPERATOR, symbol, index));
+                    tokens().add(new Token(OPERATOR, symbol, index));
                 } else if(isSingleOnlyOperator(symbol) && isTokenType(OPERATOR, nextChar(index))) {
                     String doubleOperator = new StringBuilder(symbol).append(getChar(++index)).toString();
-                    error("Nonexisting double operator: " + doubleOperator);
+                    error("Nonexistent double operator: " + doubleOperator);
                 } else if (!isSingleOnlyOperator(symbol) && isTokenType(OPERATOR, getChar(index))) {
                     String doubleOperator = new StringBuilder(symbol).append(getChar(++index)).toString();
-                    tokens.add(new Token(OPERATOR, doubleOperator, index - 1));
+                    tokens().add(new Token(OPERATOR, doubleOperator, index - 1));
                 }
                 index++;
             }  else if(CHAR_LITERAL.matches(symbol)) {
@@ -108,54 +126,78 @@ public class Lexer {
                 int literalStart = index;
                 index = appendCharLiteral(sb, ++index);
                 String literal = sb.toString();
-                tokens.add(new Token(CHAR_LITERAL, literal, literalStart));
+                tokens().add(new Token(CHAR_LITERAL, literal, literalStart));
             } else if (STRING_LITERAL.matches(symbol)) {
                 StringBuilder sb = new StringBuilder();
                 int literalStart = index;
                 index = appendStringLiteral(sb, ++index);
-                tokens.add(new Token(STRING_LITERAL, sb.toString(), literalStart));
+                tokens().add(new Token(STRING_LITERAL, sb.toString(), literalStart));
             } else if(SEPARATOR.matches(symbol)) {
-                tokens.add(new Token(SEPARATOR, symbol, index));
+                tokens().add(new Token(SEPARATOR, symbol, index));
                 index++;
             } else if(COMMENT.matches(symbol) && isStartOfComment(symbol, index)) {
                 int commentStart = index;
                 StringBuilder sb = new StringBuilder();
-                if(symbol == '/' && nextChar(index) == '/') {
+                if(symbol == SLASH_CHAR && nextChar(index) == SLASH_CHAR) {
                     index = appendLineComment(sb, index);
-                } else if(symbol == '/' && nextChar(index) == '*') {
+                } else if(symbol == SLASH_CHAR && nextChar(index) == STAR_CHAR) {
                     index = appendMultilineComment(sb, index);
                 }
 
                 if(sb.toString().startsWith(DOC.getValue())) {
-                    tokens.add(new Token(DOC, sb.toString(), commentStart));
+                    tokens().add(new Token(DOC, sb.toString(), commentStart));
                 }
                 index++;
             } else {
-                error(String.format("Unknown character %c at index %d", symbol, index));
+                error(String.format("Unknown character '%c' at index %d", symbol, index));
             }
         }
-        tokens.add(new Token(EOF, EOF.getValue(), sourceSize() - 1));
-        return tokens;
+        tokens().add(new Token(EOF, EOF.getValue(), sourceSize() - 1));
+
+        return lexingResult;
     }
 
     private List<String> loadKeywords() {
         return List.of(Constants.KEYWORDS.split("\\|"));
     }
 
-    private String extractSourceCode(File sourceFile) throws IOException {
-        return isValidSourceFile(sourceFile)
-                ? new String(new FileInputStream(sourceFile).readAllBytes())
-                : "";
+    private String extractSourceCode(File sourceFile) {
+        boolean isValidSourceFile = isValidSourceFile(sourceFile);
+        if (!isValidSourceFile) {
+            error(String.format("File %s is not a valid source file", sourceFile.getName()));
+            return EMPTY_STRING;
+        }
+        FileInputStream inputStream = null;
+        String sourceCode;
+        try {
+            inputStream = new FileInputStream(sourceFile);
+            sourceCode = new String(inputStream.readAllBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(String.format(
+                    "Problems reading source file %s input stream", sourceFile.getName()), e);
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch(IOException e) {
+                    throw new RuntimeException(String.format(
+                            "Problems closing source file %s input stream", sourceFile.getName()), e);
+                }
+            }
+        }
+
+        return sourceCode;
+
     }
 
     private int appendLineComment(StringBuilder sb, int index) {
-        return appendCharsTillSymbol(sb, index, NEW_LINE.charAt(0));
+        return appendCharsTillSymbol(sb, index, NEW_LINE_CHAR);
     }
 
     private int appendMultilineComment(StringBuilder comment, int index) {
-        int i = appendCharsTillSymbol(comment, index, STAR.charAt(0));
+        int i = appendCharsTillSymbol(comment, index, STAR_CHAR);
         comment.append(getChar(i));
-        if (nextChar(i) == '/') {
+        if (nextChar(i) == SLASH_CHAR) {
             comment.append(getChar(++i));
         }
         i++;
@@ -182,10 +224,10 @@ public class Lexer {
     }
 
     private int appendStringLiteral(StringBuilder string, int index) {
-        while (index < sourceSize() && getChar(index) != DOUBLE_QUOTES.charAt(0)) {
-            if(getChar(index) != '\\') {
+        while (index < sourceSize() && getChar(index) != DOUBLE_QUOTES_CHAR) {
+            if(getChar(index) != BACKSLASH_CHAR) {
                 string.append(getChar(index));
-            } else if (getChar(index) == '\\' && (nextChar(index) == '\\' || nextChar(index) == SINGLE_QUOTES.charAt(0) || nextChar(index) == DOUBLE_QUOTES.charAt(0))) {
+            } else if (isEscapedChar(index)) {
                 string.append(getChar(++index));
             }
             index++;
@@ -193,17 +235,30 @@ public class Lexer {
         return ++index;
     }
 
+    private boolean isEscapedChar(int index) {
+        return getChar(index) == BACKSLASH_CHAR
+                && (nextChar(index) == BACKSLASH_CHAR
+                        || nextChar(index) == SINGLE_QUOTES_CHAR
+                        || nextChar(index) == DOUBLE_QUOTES_CHAR);
+    }
+
     private int appendCharLiteral(StringBuilder sb, int index) {
-        while (index < sourceSize() && getChar(index) != SINGLE_QUOTES.charAt(0)) {
-            if(getChar(index) != '\\') {
+        while (index < sourceSize() && getChar(index) != SINGLE_QUOTES_CHAR) {
+            if(getChar(index) != BACKSLASH_CHAR) {
                 sb.append(getChar(index));
-            } else if (getChar(index) == '\\'
-                    && (nextChar(index) == '\\' || nextChar(index) == 'u' || nextChar(index) == SINGLE_QUOTES.charAt(0))) {
+            } else if (isCharValue(index)) {
                 sb.append(getChar(++index));
             }
             index++;
         }
         return ++index;
+    }
+
+    private boolean isCharValue(int index) {
+        return getChar(index) == BACKSLASH_CHAR
+                && (nextChar(index) == BACKSLASH_CHAR
+                        || nextChar(index) == U_CHAR_VALUE
+                        || nextChar(index) == SINGLE_QUOTES_CHAR);
     }
 
     private int appendCharsTillSymbol(StringBuilder sb, int index, char symbol) {
@@ -291,8 +346,8 @@ public class Lexer {
 
     }
 
-    private void error(String msg) {
-
+    private boolean error(String error) {
+        return this.lexingResult.addError(error);
     }
 
     public String getSourcecode() {
@@ -306,4 +361,14 @@ public class Lexer {
     public int sourceSize() {
         return sourcecode.length();
     }
+
+
+    private List<Token> tokens() {
+        return lexingResult.getTokens();
+    }
+
+    private boolean addToken(Token token) {
+        return lexingResult.addToken(token);
+    }
+
 }

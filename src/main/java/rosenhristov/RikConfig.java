@@ -31,7 +31,6 @@ public class RikConfig {
     }
 
     public void configure() {
-
         FileInputStream inputStream = null;
         String configInstructions;
         try {
@@ -51,7 +50,6 @@ public class RikConfig {
         Map<String, Properties> properties = extractPropertiesPerCathegory(configInstructions);
 
         //TODO finish configuration implementation
-
     }
 
     private Map<String, Properties> extractPropertiesPerCathegory(String configInstructions) {

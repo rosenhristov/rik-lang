@@ -26,15 +26,17 @@ public class Rik {
 
         RikConfig rikConfig = getConfiguration();
 
-        if (rikConfig.exists()) {
-            rikConfig.configure();
+        if (!rikConfig.exists()) {
+            throw new RuntimeException("Could not load Rik configuration successfully.");
         }
+
+        rikConfig.configure();
 
         Project project = Project.of(locationPath, projectName, isExistingProject);
         Map<File, List<File>> projectMap = project.buildProjectMap();
-        Map<String, List<String>> sourceCodeMap = buildSourceCodeMap(projectMap);
+        Map<String, List<String>> sourceCodeMap = project.buildSourceCodeMap(projectMap);
 
-        LexingMap lexingMap = Lexer.of(projectMap).lexProjectMap();
+        LexingMap lexingMap = Lexer.of(sourceCodeMap).lexSourcecodeMap();
 
         lexingMap.print();
     }

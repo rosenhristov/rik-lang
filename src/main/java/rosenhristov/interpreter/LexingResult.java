@@ -9,14 +9,14 @@ import static main.java.rosenhristov.interpreter.Constants.NEW_LINE;
 
 public class LexingResult {
 
-    private File sourceFile;
+    private String sourceCode;
 
     private List<Token> tokens;
 
     private Errors errors;
 
-    public LexingResult(File sourceFile) {
-        this.sourceFile = sourceFile;
+    public LexingResult(String sourceCode) {
+        this.sourceCode = sourceCode;
         this.tokens = new LinkedList<>();
         this.errors = new Errors();
     }
@@ -60,11 +60,11 @@ public class LexingResult {
                                 : token.getToken())));
     }
 
-    public File getSourceFile() {
-        return sourceFile;
+    public String getSourceCode() {
+        return sourceCode;
     }
 
-    public void setSourceFile(File sourceFile) {
-        this.sourceFile = sourceFile;
+    public void setSourceCode(String sourceCode) {
+        this.sourceCode = sourceCode;
     }
 }

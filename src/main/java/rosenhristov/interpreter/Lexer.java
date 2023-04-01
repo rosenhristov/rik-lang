@@ -3,12 +3,10 @@ package main.java.rosenhristov.interpreter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toMap;
 import static main.java.rosenhristov.interpreter.Constants.*;
 import static main.java.rosenhristov.interpreter.Constants.SINGLE_QUOTES_CHAR;
 import static main.java.rosenhristov.interpreter.TokenType.CHAR_LITERAL;
@@ -30,9 +28,10 @@ import static java.util.Objects.isNull;
 
 public class Lexer {
 
-    Map<File, List<File>> projectMap;
-    private String sourcecode;
-    private File sourceFile;
+    Map<String, List<String>> sourceCodeMap;
+
+    private String sourceCode;
+
     private List<String> keywords;
 
     private LexingResult lexingResult;
@@ -41,54 +40,38 @@ public class Lexer {
         keywords = loadKeywords();
     }
 
-    private Lexer(Map<File, List<File>> projectMap) {
+    private Lexer(Map<String, List<String>> sourceCodeMap) {
         this();
-        this.projectMap = projectMap;
+        this.sourceCodeMap = sourceCodeMap;
     }
 
-    public static Lexer of(Map<File, List<File>> projectMap) {
-        return new Lexer (projectMap);
+    public static Lexer of(Map<String, List<String>> sourceCodeMap) {
+        return new Lexer (sourceCodeMap);
     }
 
-    public LexingMap lexProjectMap() {
+    public LexingMap lexSourcecodeMap() {
         LexingMap lexedMap = new LexingMap();
-        projectMap.entrySet().stream().forEach(entry -> {
-            lexedMap.put(
-                    entry.getKey().getPath(),
-                     entry.getValue().stream().map(file -> {
-                        try {
-                            return lex(file);
-                        } catch (IOException e) {
-                            throw new RuntimeException(String.format("Problems tokenizing file %s", file), e);
-                        }
-                    }).collect(Collectors.toList()));
-        });
+        sourceCodeMap.entrySet().stream().forEach(
+                entry -> lexedMap.put(
+                                entry.getKey(),
+                                entry.getValue().stream()
+                                        .map(code -> lex(code))
+                                        .collect(Collectors.toList())
+                )
+        );
 
         return lexedMap;
     }
 
-    public LexingResult lex(File sourceFile) throws IOException {
-        return tokenizeFile(sourceFile);
-    }
 
-
-
-    public LexingResult tokenizeFile(File sourceFile) {
-        this.sourceFile = sourceFile;
-        return lex(extractSourceCode(sourceFile));
-    }
 
     public LexingResult lex(String sourceCode) {
-        this.sourcecode = sourceCode;
-        return lex();
-    }
-
-    public LexingResult lex() {
+        this.sourceCode = sourceCode;
         if (isNull(lexingResult)) {
-            lexingResult = new LexingResult(this.sourceFile);
+            lexingResult = new LexingResult(this.sourceCode);
         }
 
-        if(isEmpty(sourcecode)) {
+        if(isEmpty(sourceCode)) {
             lexingResult.addError("There is no source code in this file");
             return lexingResult;
         }
@@ -342,7 +325,7 @@ public class Lexer {
     }
 
     private char getChar(int index) {
-        return sourcecode.charAt(index);
+        return sourceCode.charAt(index);
 
     }
 
@@ -351,15 +334,15 @@ public class Lexer {
     }
 
     public String getSourcecode() {
-        return sourcecode;
+        return sourceCode;
     }
 
-    public void setSourcecode(String sourcecode) {
-        this.sourcecode = sourcecode;
+    public void setSourcecode(String sourceCode) {
+        this.sourceCode = sourceCode;
     }
 
     public int sourceSize() {
-        return sourcecode.length();
+        return sourceCode.length();
     }
 
 

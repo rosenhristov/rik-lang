@@ -13,9 +13,6 @@ public class LexingMap extends LinkedHashMap<String, List<LexingResult>> {
                 .collect(toList())
                 .stream()
                 .forEach(lexingResult -> {
-                    System.out.printf(
-                            "\n--------------------\n%s:\n--------------------\n\n",
-                            lexingResult.getSourceFile().getName());
 
                     if (lexingResult.hasErrors()) {
                         lexingResult.printErrors();

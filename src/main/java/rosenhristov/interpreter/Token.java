@@ -5,14 +5,31 @@ public class Token {
     private TokenType type;
 
     /**
-     * @token - The value of the token*/
+     * @token - The value of the token
+     */
     private String token;
+    private int line;
+
     private int index;
+
+    private Integer endIndex;
+
+    private boolean isMultiLine;
 
     public Token(TokenType type, String token, int index) {
         this.type = type;
         this.token = token;
         this.index = index;
+    }
+
+    public Token(TokenType type, String token, int index, Integer endIndex) {
+        this.type = type;
+        this.token = token;
+        this.index = index;
+        this.endIndex = endIndex;
+        if (endIndex != null && endIndex > index) {
+            isMultiLine = true;
+        }
     }
 
     public Token(TokenType type, char token, int index) {
@@ -45,6 +62,14 @@ public class Token {
 
     public void setIndex(int index) {
         this.index = index;
+    }
+
+    public int getLine() {
+        return line;
+    }
+
+    public void setLine(int line) {
+        this.line = line;
     }
 
     @Override

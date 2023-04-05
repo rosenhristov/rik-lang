@@ -1,6 +1,5 @@
 package main.java.rosenhristov.interpreter;
 
-import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -9,14 +8,11 @@ import static main.java.rosenhristov.interpreter.Constants.NEW_LINE;
 
 public class LexingResult {
 
-    private String sourceCode;
-
     private List<Token> tokens;
 
     private Errors errors;
 
     public LexingResult(String sourceCode) {
-        this.sourceCode = sourceCode;
         this.tokens = new LinkedList<>();
         this.errors = new Errors();
     }
@@ -60,11 +56,21 @@ public class LexingResult {
                                 : token.getToken())));
     }
 
-    public String getSourceCode() {
-        return sourceCode;
-    }
-
-    public void setSourceCode(String sourceCode) {
-        this.sourceCode = sourceCode;
+    public LineTokensMap buildLineTokensMap() {
+        LineTokensMap linesMap = new LineTokensMap();
+        int lineNumber = 1;
+        List<Token> lineTokens = new LinkedList<>();
+        for (Token token : tokens) {
+            if (!token.getType().getValue().equals("\\n")) {
+                token.setLine(lineNumber);
+                lineTokens.add(token);
+            } else {
+                linesMap.put(lineNumber, lineTokens);
+                lineTokens = new LinkedList<>();
+                lineNumber++;
+            }
+        }
+        return linesMap;
     }
 }
+

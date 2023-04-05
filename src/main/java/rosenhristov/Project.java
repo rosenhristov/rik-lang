@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
+import static main.java.rosenhristov.interpreter.Constants.EMPTY_STRING;
 import static main.java.rosenhristov.interpreter.Constants.SOURCE_FILE_EXTENSION;
 import static main.java.rosenhristov.Utils.isFileOrEmptyDir;
 
@@ -88,8 +89,8 @@ public class Project {
         }
     }
 
-    public Map<String, List<String>> buildSourceCodeMap(Map<File, List<File>> projectMap) {
-        Map<String, List<String>> sourcecodeMap = new LinkedHashMap<>();
+    public Map<ProjectDir, List<SourceCode>> buildSourceCodeMap(Map<File, List<File>> projectMap) {
+        Map<ProjectDir, List<SourceCode>> sourcecodeMap = new LinkedHashMap<>();
         projectMap.entrySet()
                 .stream()
                 .forEach(entry -> {
@@ -97,7 +98,7 @@ public class Project {
                         return;
                     }
                     sourcecodeMap.put(
-                            entry.getKey().getPath(),
+                            new ProjectDir(entry.getKey().getPath()),
                             entry.getValue()
                                     .stream()
                                     .map(file -> {
@@ -122,13 +123,41 @@ public class Project {
                                             }
                                         }
 
-                                        return sourceCode;
+                                        return new SourceCode(sourceCode);
                                     })
                                     .collect(toList()));
                 });
 
         return sourcecodeMap;
     }
+
+//    private String extractSourceCode(File sourceFile) {
+//        boolean isValidSourceFile = isValidSourceFile(sourceFile);
+//        if (!isValidSourceFile) {
+//            syntaxError(lineNumber, String.format("File %s is not a valid source file", sourceFile.getName()));
+//            return EMPTY_STRING;
+//        }
+//        FileInputStream inputStream = null;
+//        String sourceCode;
+//        try {
+//            inputStream = new FileInputStream(sourceFile);
+//            sourceCode = new String(inputStream.readAllBytes());
+//        } catch (IOException e) {
+//            throw new RuntimeException(String.format(
+//                    "Problems reading source file %s input stream", sourceFile.getName()), e);
+//        } finally {
+//            if (inputStream != null) {
+//                try {
+//                    inputStream.close();
+//                } catch(IOException e) {
+//                    throw new RuntimeException(String.format(
+//                            "Problems closing source file %s input stream", sourceFile.getName()), e);
+//                }
+//            }
+//        }
+//
+//        return sourceCode;
+//    }
 
 
     private boolean isSourceFile(File file) {

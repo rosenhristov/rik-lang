@@ -11,7 +11,9 @@ public enum TokenType {
     STRING_LITERAL("([\"])+"),
     SEPARATOR("([\\{\\}\\[\\]\\(\\)\\.,:;\"\'])+"),
     COMMENT("([/\\*]){1,2}"),
+    MULTILINE_COMMENT("/*[ \n]{0,1}"),
     DOC("/**"),
+
     NEWLINE("\\n"),
     WHITESPACE("[\\s|\\t|\\r|\\f|\\n]+"),
     EOF("EOF");

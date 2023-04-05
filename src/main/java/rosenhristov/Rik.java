@@ -1,14 +1,12 @@
 package main.java.rosenhristov;
 
 import main.java.rosenhristov.interpreter.Lexer;
-import main.java.rosenhristov.interpreter.LexingMap;
+import main.java.rosenhristov.interpreter.LexedMap;
 
 import java.io.*;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.stream.Collectors.toList;
 import static main.java.rosenhristov.interpreter.Constants.CONFIG_FILENAME;
 import static main.java.rosenhristov.Utils.*;
 
@@ -21,7 +19,6 @@ public class Rik {
     private static boolean isExistingProject = true;
 
     public static void main(String[] args) throws IOException {
-
         checkInitialProjectData();
 
         RikConfig rikConfig = getConfiguration();
@@ -34,14 +31,11 @@ public class Rik {
 
         Project project = Project.of(locationPath, projectName, isExistingProject);
         Map<File, List<File>> projectMap = project.buildProjectMap();
-        Map<String, List<String>> sourceCodeMap = project.buildSourceCodeMap(projectMap);
+        Map<ProjectDir, List<SourceCode>> sourceCodeMap = project.buildSourceCodeMap(projectMap);
+        LexedMap lexedMap = Lexer.of(sourceCodeMap).lexSourceCodeMap();
 
-        LexingMap lexingMap = Lexer.of(sourceCodeMap).lexSourcecodeMap();
-
-        lexingMap.print();
+        lexedMap.print();
     }
-
-
 
     private static void checkInitialProjectData() {
         if (isBlank(locationPath) || isBlank(projectName)) {
@@ -53,52 +47,12 @@ public class Rik {
         return RikConfig.of(buildConfigurationPath());
     }
 
-    private static Map<String, List<String>> buildSourceCodeMap(Map<File, List<File>> projectMap) {
-        Map<String, List<String>> sourcecodeMap = new LinkedHashMap<>();
-        projectMap.entrySet()
-                .stream()
-                .forEach(entry -> sourcecodeMap.put(entry.getKey().getPath(),
-                        entry.getValue()
-                                .stream()
-                                .map(file -> {
-
-                                    FileInputStream fileInputStream = null;
-                                    String sourceCode;
-                                    try {
-                                        fileInputStream = new FileInputStream(file);
-                                        sourceCode = new String(fileInputStream.readAllBytes());
-                                    } catch (FileNotFoundException e) {
-                                        throw new RuntimeException(String.format("File %s does not exist.", file.getName()), e);
-                                    } catch (IOException e) {
-                                        throw new RuntimeException(String.format("Problems reading file %s.", file.getName()), e);
-                                    } finally {
-                                        if (fileInputStream != null) {
-                                            try {
-                                                fileInputStream.close();
-                                            } catch (IOException e) {
-                                                throw new RuntimeException(
-                                                        "Problems closing input stream for reading file "
-                                                                + file.getName(), e);
-                                            }
-                                        }
-                                    }
-
-                                    return sourceCode;
-                                })
-                                .collect(toList())));
-
-        return sourcecodeMap;
-    }
-
     private static void getProjectDataInput() {
-        String projLocation = null;
-        String projectName = null;
-        String isExistingProj = null;
         InputStreamReader reader = new InputStreamReader(System.in);
         BufferedReader scanner = new BufferedReader(reader);
-        askForProjectLocation(scanner, projLocation);
-        askForProjectName(scanner, projectName);
-        askForProjectType(scanner, isExistingProj);
+        askForProjectLocation(scanner);
+        askForProjectName(scanner);
+        askForProjectType(scanner);
         try {
             scanner.close();
             reader.close();
@@ -107,44 +61,40 @@ public class Rik {
         }
     }
 
-    private static void askForProjectLocation(BufferedReader scanner, String projLocation) {
+    private static void askForProjectLocation(BufferedReader scanner) {
         do  {
             System.out.println("Please, enter project location:");
             try {
-                projLocation = scanner.readLine();
+                locationPath = scanner.readLine();
             } catch (IOException e) {
                 throw new RuntimeException("Problems reading project location path", e);
             }
-        } while (!isValidLocation(projLocation));
-
-        locationPath = projLocation;
+        } while (!isValidLocation(locationPath));
     }
 
 
-    private static void askForProjectName(BufferedReader scanner, String projectName) {
+    private static void askForProjectName(BufferedReader scanner) {
         do {
             System.out.println("Please, enter project name:");
             try {
-                projectName = scanner.readLine();
+                Rik.projectName = scanner.readLine();
             } catch (IOException e) {
                 throw new RuntimeException("Problems reading project name", e);
             }
         } while (!isValidProjectName(projectName));
-
-        Rik.projectName = projectName;
     }
 
-    private static void askForProjectType( BufferedReader scanner, String isExistingProj) {
+    private static void askForProjectType(BufferedReader scanner) {
+        String isExistingProject;
         do  {
             System.out.println("Is it an existing project?:");
             try {
-                isExistingProj = scanner.readLine();
+                isExistingProject = scanner.readLine();
             } catch (IOException e) {
                 throw new RuntimeException("Problems reading project location path", e);
             }
-        } while (!isValidProjectType(isExistingProj));
-
-        isExistingProject = Boolean.parseBoolean(isExistingProj);
+        } while (!isValidProjectType(isExistingProject));
+        Rik.isExistingProject = Boolean.parseBoolean(isExistingProject);
     }
 
     private static boolean isValidProjectType(String isExistingProject) {
